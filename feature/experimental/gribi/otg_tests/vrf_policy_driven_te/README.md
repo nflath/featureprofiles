@@ -479,8 +479,13 @@ NH#200 -> {
 IPv4Entry {203.0.113.1/32 (TE_VRF_111)} -> NHG#1 (DEFAULT VRF) -> {
   {NH#1, DEFAULT VRF, weight:1,ip_address=192.0.2.101},
   {NH#2, DEFAULT VRF, weight:3,ip_address=192.0.2.102},
-  backup_next_hop_group: 1000 // re-encap to 203.0.113.100
+  backup_next_hop_group: 1111 // re-encap to 203.0.113.100
 }
+
+NHG#1111 (Default VRF) {
+    TE_REPAIR VRF
+}
+
 IPv4Entry {192.0.2.101/32 (DEFAULT VRF)} -> NHG#11 (DEFAULT VRF) -> {
   {NH#11, DEFAULT VRF, weight:1,mac_address:magic_mac, interface-ref:dut-port-2-interface},
   {NH#12, DEFAULT VRF, weight:3,mac_address:magic_mac, interface-ref:dut-port-3-interface},
@@ -489,8 +494,9 @@ IPv4Entry {192.0.2.102/32 (DEFAUlT VRF)} -> NHG#12 (DEFAULT VRF) -> {
   {NH#13, DEFAULT VRF, weight:2,mac_address:magic_mac, interface-ref:dut-port-4-interface},
 }
 
-NHG#1000 (Default VRF) {
-  {NH#1000, DEFAULT VRF}
+IPv4Entry {203.0.113.1/32 (TE_REPAIR VRF)} -> NHG#1000 (DEFAULT VRF) -> {
+  {NH#1000, DEFAULT VRF}  // re-encap to 203.0.113.100
+   backup_next_hop_group: 1001
 }
 NH#1000 -> {
   decapsulate_header: OPENCONFIGAFTTYPESENCAPSULATIONHEADERTYPE_IPV4
@@ -521,13 +527,14 @@ NH#1001 -> {
 
 IPv4Entry {203.10.113.2/32 (TE_VRF_111)} -> NHG#3 (DEFAULT VRF) -> {
   {NH#4, DEFAULT VRF, weight:1,ip_address=192.0.2.104},
-  backup_next_hop_group: 1002 // re-encap to 203.10.113.101
+  backup_next_hop_group: 1111 // re-encap to 203.10.113.101
 }
 IPv4Entry {192.0.2.104/32 (DEFAULT VRF)} -> NHG#14 (DEFAULT VRF) -> {
   {NH#15, DEFAULT VRF, weight:1,mac_address:magic_mac, interface-ref:dut-port-6-interface},
 }
-NHG#1002 (DEFAULT VRF) {
-  {NH#1002, DEFAULT VRF}
+IPv4Entry {203.10.113.2/32 (TE_REPAIR VRF)} -> NHG#1002 (DEFAULT VRF) -> {
+    {NH#1002, DEFAULT VRF} // re-encap to 203.10.113.101
+    backup_next_hop_group: 1001
 }
 NH#1002 -> {
   decapsulate_header: OPENCONFIGAFTTYPESENCAPSULATIONHEADERTYPE_IPV4
@@ -569,7 +576,7 @@ The DUT should be reset to the baseline after each of the following tests.
     NH#1001 -> {
         decapsulate_header: OPENCONFIGAFTTYPESDECAPSULATIONHEADERTYPE_IPV4
     }
-    
+
     ```
 
 2.  Apply vrf selection policy `vrf_selection_policy_w` to DUT port-1.
